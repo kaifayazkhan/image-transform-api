@@ -3,6 +3,7 @@ import cookieParser from 'cookie-parser';
 import cors from 'cors';
 import errorHandler from './middlewares/error.middleware.js';
 import { requestMiddleware } from './middlewares/request.middleware.js';
+import routes from './routes/index.js';
 
 const app = express();
 
@@ -17,6 +18,8 @@ app.use(
 );
 
 app.use(requestMiddleware);
+
+app.use('/api/v1', routes);
 
 app.get('/', (req, res) => {
   res.status(200).json({

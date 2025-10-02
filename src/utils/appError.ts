@@ -1,3 +1,5 @@
+import type { ZodError } from 'zod';
+
 class AppError extends Error {
   statusCode: number;
   data: null | object;
@@ -7,7 +9,7 @@ class AppError extends Error {
   constructor(
     statusCode: number,
     message = 'Something went wrong',
-    errors = [],
+    errors: ZodError[] | any[] = [],
     stack = ''
   ) {
     super(message);
