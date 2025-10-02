@@ -49,7 +49,7 @@ export const login = asyncHandler(async (req: Request, res: Response) => {
   const user = await UserModel.findByEmail(email);
 
   if (!user?.id) {
-    throw new AppError(404, 'Invalid email or password');
+    throw new AppError(401, 'Invalid email or password');
   }
 
   const comparePassword = await bcrypt.compare(password, user.password);
@@ -84,7 +84,11 @@ export const login = asyncHandler(async (req: Request, res: Response) => {
 });
 
 export const logout = asyncHandler(async (req: Request, res: Response) => {
-  const userId = Number(req?.user?.id);
+  if (!req.user?.id) {
+    throw new AppError(401, 'Unauthorized request');
+  }
+
+  const userId = Number(req.user.id);
   await UserModel.saveRefreshToken(null, userId);
 
   const cookieOptions = {
@@ -115,7 +119,7 @@ export const refresh = asyncHandler(async (req: Request, res: Response) => {
   };
 
   if (!userId) {
-    throw new AppError(400, 'Refresh token expired');
+    throw new AppError(400, 'Invalid refresh token');
   }
 
   const user = await UserModel.findById(userId);

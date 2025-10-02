@@ -22,7 +22,13 @@ class UserModel {
 
   async findByEmail(email: string) {
     const [result] = await db
-      .select()
+      .select({
+        id: users.id,
+        name: users.name,
+        email: users.email,
+        password: users.password,
+        refreshToken: users.refreshToken,
+      })
       .from(users)
       .where(eq(users.email, email));
     return result;
