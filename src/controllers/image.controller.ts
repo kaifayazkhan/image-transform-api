@@ -10,6 +10,7 @@ import { applyTransformations } from '../utils/sharp.js';
 import { env } from '../config/env.js';
 import { asyncHandler } from '../utils/asyncHandler.js';
 import AppError from '../utils/appError.js';
+import type { TransformedImageResponse } from '../types/image.type.js';
 
 export const uploadImage = asyncHandler(async (req: Request, res: Response) => {
   const { success, error, data } = UploadImagesSchema.safeParse(req.body);
@@ -134,6 +135,92 @@ export const transformImage = asyncHandler(
         original_image_url: imageURL,
         transformed_image_url: transformedImageURL,
         mime_type: imageMimeType,
+      },
+    });
+  }
+);
+
+export const getTransformedImageById = asyncHandler(
+  async (req: Request, res: Response) => {
+    const userId = req.user?.id;
+    if (!userId) {
+      throw new AppError(401, 'Unauthorized request');
+    }
+
+    const imageId = Number(req.params.id);
+
+    if (!imageId || imageId <= 0) {
+      throw new AppError(400, 'Invalid image id');
+    }
+
+    const image = await ImageModel.findTransformedImageById(imageId, userId);
+
+    if (!image) {
+      throw new AppError(404, 'Image not found');
+    }
+
+    return res.status(200).json({
+      success: true,
+      data: {
+        id: image.id,
+        transformed_image_url: `${env.IMAGE_DOMAIN}/${image.transformedImageKey}`,
+        original_image_url: `${env.IMAGE_DOMAIN}/${image.originalImageKey}`,
+        size_in_bytes: image.sizeInBytes,
+        mime_type: image.mimeType,
+        created_at: image.createdAt,
+      },
+    });
+  }
+);
+
+export const getUserTransformedImages = asyncHandler(
+  async (req: Request, res: Response) => {
+    const userId = req.user?.id;
+    if (!userId) {
+      throw new AppError(401, 'Unauthorized request');
+    }
+
+    const page = Math.max(Number(req.query.page) || 1, 1);
+    const limit = Math.min(Math.max(Number(req.query.limit) || 10, 1), 100);
+    const offset = (page - 1) * limit;
+
+    const { data: result, total } =
+      await ImageModel.findAllTransformedImagesForUser(userId, limit, offset);
+
+    if (result.length === 0) {
+      return res.status(200).json({
+        success: true,
+        data: [],
+        meta: {
+          total: 0,
+          total_pages: 0,
+          page_size: limit,
+          current_page: page,
+        },
+      });
+    }
+
+    let images: TransformedImageResponse[] = [];
+
+    for (const image of result) {
+      images.push({
+        id: image.id,
+        transformed_image_url: `${env.IMAGE_DOMAIN}/${image.transformedImageKey}`,
+        original_image_url: `${env.IMAGE_DOMAIN}/${image.originalImageKey}`,
+        size_in_bytes: image.sizeInBytes,
+        mime_type: image.mimeType,
+        created_at: image.createdAt,
+      });
+    }
+
+    return res.status(200).json({
+      success: true,
+      data: images,
+      meta: {
+        total: total,
+        total_pages: Math.ceil(total / limit),
+        page_size: limit,
+        current_page: page,
       },
     });
   }
