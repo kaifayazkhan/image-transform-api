@@ -3,7 +3,7 @@ CREATE TABLE "transformed_image" (
 	"storage_key" text NOT NULL,
 	"original_image_id" integer NOT NULL,
 	"mime_type" varchar(100),
-	"size_in_bytes" varchar(100),
+	"size_in_bytes" integer,
 	"created_at" timestamp DEFAULT now() NOT NULL
 );
 --> statement-breakpoint
@@ -12,7 +12,7 @@ CREATE TABLE "user_image" (
 	"user_id" integer NOT NULL,
 	"storage_key" text NOT NULL,
 	"mime_type" varchar(100),
-	"size_in_bytes" varchar(100),
+	"size_in_bytes" integer,
 	"uploaded_at" timestamp DEFAULT now() NOT NULL
 );
 --> statement-breakpoint
