@@ -9,6 +9,11 @@ const envSchema = z.object({
   DATABASE_URL: z.string().min(1),
   ACCESS_TOKEN_SECRET: z.string().min(72),
   REFRESH_TOKEN_SECRET: z.string().min(72),
+  AWS_ACCESS_KEY: z.string().length(20),
+  AWS_SECRET_ACCESS_KEY: z.string().length(40),
+  AWS_S3_BUCKET_NAME: z.string().min(1),
+  AWS_REGION: z.string().min(1),
+  IMAGE_DOMAIN: z.string().min(1),
 });
 
 export const env = envSchema.parse(process.env);

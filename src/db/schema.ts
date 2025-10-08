@@ -26,9 +26,11 @@ export const userImage = pgTable('user_image', {
     .references(() => users.id, { onDelete: 'cascade' }),
   storageKey: text('storage_key').notNull(),
   mimeType: varchar('mime_type', { length: 100 }),
-  sizeInBytes: varchar('size_in_bytes', { length: 100 }),
+  sizeInBytes: integer('size_in_bytes'),
   uploadedAt: timestamp('uploaded_at').defaultNow().notNull(),
 });
+
+export type UserImage = typeof userImage.$inferSelect;
 
 export const transformedImage = pgTable('transformed_image', {
   id: serial('id').primaryKey(),
@@ -37,6 +39,6 @@ export const transformedImage = pgTable('transformed_image', {
     .notNull()
     .references(() => userImage.id),
   mimeType: varchar('mime_type', { length: 100 }),
-  sizeInBytes: varchar('size_in_bytes', { length: 100 }),
+  sizeInBytes: integer('size_in_bytes'),
   createdAt: timestamp('created_at').defaultNow().notNull(),
 });
