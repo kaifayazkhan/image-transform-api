@@ -58,13 +58,13 @@ export const login = asyncHandler(async (req: Request, res: Response) => {
   const user = await UserModel.findByEmail(email);
 
   if (!user?.id) {
-    throw new AppError(401, 'Invalid email or password');
+    throw new AppError(400, 'Invalid email or password');
   }
 
   const comparePassword = await bcrypt.compare(password, user.password);
 
   if (!comparePassword) {
-    throw new AppError(401, 'Invalid email or password');
+    throw new AppError(400, 'Invalid email or password');
   }
 
   const { accessToken, refreshToken } = generateAccessAndRefreshToken(user.id);
@@ -116,7 +116,7 @@ export const refresh = asyncHandler(async (req: Request, res: Response) => {
   const refreshToken = req.cookies?.refreshToken;
 
   if (!refreshToken) {
-    throw new AppError(401, 'Unauthorized request');
+    throw new AppError(400, 'Missing refresh token');
   }
 
   const { id: userId } = jwt.verify(refreshToken, env.REFRESH_TOKEN_SECRET) as {
@@ -124,13 +124,13 @@ export const refresh = asyncHandler(async (req: Request, res: Response) => {
   };
 
   if (!userId) {
-    throw new AppError(400, 'Invalid refresh token');
+    throw new AppError(403, 'Invalid refresh token');
   }
 
   const user = await UserModel.findById(userId);
 
   if (!user?.id || !user.refreshToken) {
-    throw new AppError(401, 'Invalid refresh token');
+    throw new AppError(403, 'Invalid refresh token');
   }
 
   const compareRefreshToken = await bcrypt.compare(
@@ -139,7 +139,7 @@ export const refresh = asyncHandler(async (req: Request, res: Response) => {
   );
 
   if (!compareRefreshToken) {
-    throw new AppError(401, 'Invalid refresh token');
+    throw new AppError(403, 'Invalid refresh token');
   }
 
   const accessToken = generateAccessToken(userId);
