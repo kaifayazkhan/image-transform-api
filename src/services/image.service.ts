@@ -6,7 +6,12 @@ import {
 import logger from '../config/logger.js';
 import { env } from '../config/env.js';
 import { AppError, ValidationError } from '../utils/appError.js';
-import { getObject, getPresignedPutUrl, uploadObject } from '../utils/s3.js';
+import {
+  getObject,
+  getPresignedPutUrl,
+  uploadObject,
+  deleteObject,
+} from '../utils/s3.js';
 import { HTTP_STATUS } from '../utils/httpStatus.js';
 import { ERROR_CODES } from '../utils/errorCodes.js';
 import { applyTransformations } from '../utils/sharp.js';
@@ -133,6 +138,8 @@ class ImageService {
     );
 
     if (!transformedImage) {
+      logger.info(`Deleting image from s3 for request id: ${imageId}`);
+      await deleteObject(imageKey);
       throw new AppError(
         HTTP_STATUS.INTERNAL_SERVER_ERROR,
         'Failed to record transformed image in database',

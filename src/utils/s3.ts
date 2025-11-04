@@ -1,6 +1,7 @@
 import {
   GetObjectCommand,
   PutObjectCommand,
+  DeleteObjectCommand,
   S3Client,
 } from '@aws-sdk/client-s3';
 import { getSignedUrl } from '@aws-sdk/s3-request-presigner';
@@ -69,5 +70,18 @@ export async function getObject(key: string) {
   } catch (error) {
     logger.error(`Failed to get object: ${error}`);
     throw error instanceof Error ? error : new Error('Failed to get object');
+  }
+}
+
+export async function deleteObject(key: string) {
+  try {
+    const command = new DeleteObjectCommand({
+      Bucket: BUCKET_NAME,
+      Key: key,
+    });
+    await client.send(command);
+  } catch (error) {
+    logger.error(`Failed to delete object: ${error}`);
+    throw error instanceof Error ? error : new Error('Failed to delete object');
   }
 }
