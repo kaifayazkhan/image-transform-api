@@ -93,8 +93,10 @@ class AuthService {
   }
 
   async refreshAccessToken(refreshToken: string) {
+    const CLEAR_COOKIE = true;
+
     if (!refreshToken) {
-      throw new UnauthorizedError('Missing refresh token');
+      throw new UnauthorizedError('Missing refresh token', [], CLEAR_COOKIE);
     }
 
     const { id: userId } = jwt.verify(
@@ -105,19 +107,19 @@ class AuthService {
     };
 
     if (!userId) {
-      throw new UnauthorizedError('Invalid refresh token');
+      throw new UnauthorizedError('Invalid refresh token', [], CLEAR_COOKIE);
     }
 
     const user = await UserModel.findById(userId);
 
     if (!user?.id || !user.refreshToken) {
-      throw new UnauthorizedError('Invalid refresh token');
+      throw new UnauthorizedError('Invalid refresh token', [], CLEAR_COOKIE);
     }
 
     const isTokenValid = await bcrypt.compare(refreshToken, user.refreshToken);
 
     if (!isTokenValid) {
-      throw new UnauthorizedError('Invalid refresh token');
+      throw new UnauthorizedError('Invalid refresh token', [], CLEAR_COOKIE);
     }
 
     const accessToken = generateAccessToken(userId);

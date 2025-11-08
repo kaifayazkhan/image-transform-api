@@ -1,10 +1,8 @@
 import type { Request, Response, NextFunction } from 'express';
 import jwt from 'jsonwebtoken';
 import { env } from '../config/env.js';
-import { AppError, UnauthorizedError } from '../utils/appError.js';
+import { UnauthorizedError } from '../utils/appError.js';
 import { asyncHandler } from '../utils/asyncHandler.js';
-import { HTTP_STATUS } from '../utils/httpStatus.js';
-import { ERROR_CODES } from '../utils/errorCodes.js';
 import { ACCESS_TOKEN_KEY } from '../utils/constants.js';
 
 interface JwtPayload {
@@ -31,13 +29,7 @@ export const verifyJWT = asyncHandler(
       req.user = { id };
       next();
     } catch (err) {
-      return next(
-        new AppError(
-          HTTP_STATUS.UNAUTHORIZED,
-          'Invalid or expired token',
-          ERROR_CODES.UNAUTHORIZED
-        )
-      );
+      return next(new UnauthorizedError('Invalid or expired token'));
     }
   }
 );
