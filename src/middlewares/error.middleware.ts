@@ -1,6 +1,8 @@
 import type { Request, Response, NextFunction } from 'express';
 import logger from '../config/logger.js';
-import type { AppError } from '../utils/appError.js';
+import { AppError, UnauthorizedError } from '../utils/appError.js';
+import { ACCESS_TOKEN_KEY, REFRESH_TOKEN_KEY } from '../utils/constants.js';
+import { cookieOptions } from '../utils/cookie.js';
 
 const errorHandler = (
   err: AppError,
@@ -18,6 +20,11 @@ const errorHandler = (
     errors: err?.errors,
     stack: err?.stack,
   });
+
+  if (err instanceof UnauthorizedError && err.shouldClearCookies) {
+    res.clearCookie(ACCESS_TOKEN_KEY, cookieOptions);
+    res.clearCookie(REFRESH_TOKEN_KEY, cookieOptions);
+  }
 
   res.status(err.statusCode || 500).json({
     status: err.statusCode,

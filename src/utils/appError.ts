@@ -48,7 +48,14 @@ export class ValidationError extends AppError {
 }
 
 export class UnauthorizedError extends AppError {
-  constructor(message = 'Unauthorized request', errors = []) {
+  shouldClearCookies: boolean;
+  constructor(
+    message = 'Unauthorized request',
+    errors = [],
+    shouldClearCookies = false
+  ) {
     super(HTTP_STATUS.UNAUTHORIZED, message, ERROR_CODES.UNAUTHORIZED, errors);
+
+    this.shouldClearCookies = shouldClearCookies;
   }
 }
